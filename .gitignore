@@ -1,0 +1,6 @@
+#emacs
+*~
+
+#Dr Racket
+*.bak
+compiled/

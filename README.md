@@ -1,2 +1,2 @@
 # the-little-schemer
-Scheme and Emacs Lisp for Book "The Little Schemer"
+Scheme and Emacs Lisp code for book "The Little Schemer"

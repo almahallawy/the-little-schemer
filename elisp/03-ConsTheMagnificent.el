@@ -24,7 +24,7 @@
   (cond
    ((null l) nil)
    (t (cons (car (car l))
-	    (first (cdr l))))))
+	    (firsts (cdr l))))))
 
 ;; insertR builds a lat with -new- inserted to the righ
 ;; of the first occurrence of old

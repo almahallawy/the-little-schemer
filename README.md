@@ -7,3 +7,9 @@ Scheme and Emacs-Lisp code for book "The Little Schemer"
 - Peter Krumins:
   - http://www.catonmat.net/blog/top-100-books-part-two
   - https://github.com/pkrumins/the-little-schemer.git
+
+- Scheme code developed using DrRacket: https://racket-lang.org/
+- Emacs-Lisp code developed using emacs and run them in lisp-interaction-mode (M-x lisp-interaction-mode)
+
+## Notes
+scheme/08-LambdaTheUltimate-multirember&co.docx is helpful to understand collector function in Chaper 8

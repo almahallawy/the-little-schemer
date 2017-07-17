@@ -9,10 +9,12 @@
     (cdr l))
    (t (cons (car l)
 	    (rember-f1 test? a (cdr l))))))
-(rember-f1 (function eq) 5 '(6 2 5 3))
-(setq eqer (function eq))
-(rember-f1 eqer 5 '(6 2 5 3))
 
+(rember-f1 (function eq) 5 '(6 2 5 3))
+
+(setq eqer (function eq))
+
+(rember-f1 eqer 5 '(6 2 5 3))
 
 
 ;;We need to enable Lexical binding in elisp. The default binding is Dynamic
@@ -20,11 +22,9 @@
 ;;https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding
 (setq lexical-binding t)
 
-
 (defun eq?-c (a)
-  (function
-   (lambda (x)
-     (eq x a))))
+  (lambda (x)
+    (eq x a)))
 
 (eq?-c 'salad)
 
@@ -34,23 +34,21 @@
 
 (funcall (eq?-c 'salad) 'tuna)
 
-
 (defun rember-f (test?)
-  (function
-   (lambda (a l)
-     (cond
-      ((null l) (quote ()))
-      ((funcall test? (car l) a) (cdr l))
-      (t (cons (car l)
-	       (funcall (rember-f test?) a (cdr l))))))))
+  (lambda (a l)
+    (cond
+     ((null l) (quote ()))
+     ((funcall test? (car l) a) (cdr l))
+     (t (cons (car l)
+	      (funcall (rember-f test?) a (cdr l)))))))
 
 (setq rember-eq? (rember-f (function eq)))
 
 (funcall rember-eq? 'tuna '(tuna salad is good))
+
 (funcall (rember-f (function eq)) 'tuna '(tuna salad is good))
 
 (funcall (rember-f (function eq)) 'eq '(equal? eq eqan? eqlist? eqpair? ))
-
 
 (defun insertL1 (new old l)
   (cond
@@ -61,28 +59,26 @@
 	    (insertL1 new old (cdr l))))))
 
 (defun insertL-f (test?)
-  (function
-   (lambda (new old l)
-     (cond
-      ((null l) (quote ()))
-      ((funcall test? (car l) old)
-       (cons new (cons old (cdr l))))
-      (t (cons (car l)
-	       (funcall (insertL-f test?)
-			new old (cdr l))))))))
+  (lambda (new old l)
+    (cond
+     ((null l) (quote ()))
+     ((funcall test? (car l) old)
+      (cons new (cons old (cdr l))))
+     (t (cons (car l)
+	      (funcall (insertL-f test?)
+		       new old (cdr l)))))))
 
 (funcall (insertL-f (function eq)) 5 6  '(1 2 3 4 6))
 
 (defun insertR-f (test?)
-  (function
-   (lambda (new old l)
-     (cond
-      ((null l) (quote ()))
-      ((funcall test? (car l) old)
-       (cons old (cons new (cdr l))))
-      (t (cons (car l)
-	       (funcall (insertR-f test?)
-			new old (cdr l))))))))
+  (lambda (new old l)
+    (cond
+     ((null l) (quote ()))
+     ((funcall test? (car l) old)
+      (cons old (cons new (cdr l))))
+     (t (cons (car l)
+	      (funcall (insertR-f test?)
+		       new old (cdr l)))))))
 
 (funcall (insertR-f (function eq)) 6 5 '(1 2 3 4 5))
 
@@ -93,14 +89,13 @@
   (cons old (cons new l)))
 
 (defun insert-g (seq)
-  (function
-   (lambda (new old l)
-     (cond
-      ((null l) (quote ()))
-      ((eq (car l) old)
-       (funcall seq new old (cdr l)))
-      (t (cons (car l)
-	       (funcall (insert-g seq) new old (cdr l))))))))
+  (lambda (new old l)
+    (cond
+     ((null l) (quote ()))
+     ((eq (car l) old)
+      (funcall seq new old (cdr l)))
+     (t (cons (car l)
+	      (funcall (insert-g seq) new old (cdr l)))))))
 
 (setq insertL (insert-g (function seqL)))
 
@@ -109,13 +104,11 @@
 (funcall insertL 'a 'b '(1 2 3 bb c d b))
 
 (funcall insertR 'a 'b '(1 2 4 bb c d b))
- 
 
 (setq insertL2
       (insert-g
-       (function
-	(lambda (new old l)
-	  (cons new (cons old l))))))
+       (lambda (new old l)
+	 (cons new (cons old l)))))
 
 (funcall insertL2 'a 'b '(1 2 3 db c d b))
 
@@ -167,7 +160,7 @@
     (* (value_old (1st-sub-exp nexp))
        (value_old (2nd-sub-exp nexp))))
    (t (expt (value_old (1st-sub-exp nexp))
-		(value_old (2nd-sub-exp nexp))))))
+	    (value_old (2nd-sub-exp nexp))))))
 
 (value_old '(^ 2 3))
 
@@ -212,20 +205,20 @@
 (multirember 'a '(1 a 2 a 3 a 4 a 5))
 
 (defun multirember-f (test?)
-  (function
-   (lambda (a lat)
-     (cond
-      ((null lat) (quote ()))
-      ((funcall test? (car lat) a)
-       (funcall (multirember-f test?) a (cdr lat)))
-      (t (cons (car lat)
-	       (funcall (multirember-f test?) a (cdr lat))))))))
-
+  (lambda (a lat)
+    (cond
+     ((null lat) (quote ()))
+     ((funcall test? (car lat) a)
+      (funcall (multirember-f test?) a (cdr lat)))
+     (t (cons (car lat)
+	      (funcall (multirember-f test?) a (cdr lat)))))))
 
 (funcall (multirember-f (function  eq)) 'a '(1 a 2 a 3 a 4 a 5))
+
 (funcall (multirember-f (function  eq)) 'tuna '(shrimp salad tuna salad and tuna))
 
 (setq multirember-eq? (multirember-f (function eq)))
+
 (funcall multirember-eq? 'a '(1 a 2 a 3 a 4 a 5))
 
 (setq eq?-tuna
@@ -260,15 +253,14 @@
     (funcall col (quote ()) (quote ())))
    ((eq (car lat) a)
     (multirember&co a (cdr lat)
-		    (function
-		     (lambda (newlat seen)
-		       (funcall col newlat
-			    (cons (car lat) seen))))))
+		    (lambda (newlat seen)
+		      (funcall col newlat
+			       (cons (car lat) seen)))))
    (t (multirember&co a (cdr lat)
-		      (function
-		       (lambda (newlat seen)
-			 (funcall col (cons (car lat) newlat)
-			      seen)))))))
+		      (lambda (newlat seen)
+			(funcall col (cons (car lat) newlat)
+				 seen))))))
+
 (defun a-friend (x y)
   (null y))
 
@@ -287,7 +279,6 @@
   (length x))
 
 (multirember&co 'tuna '(stawberries tuna and swordfish) (function last-friend))
-
 
 (defun multiinsertL (new old lat)
   (cond
@@ -336,35 +327,28 @@
     (funcall col (quote ()) 0 0))
    ((eq (car lat) oldL)
     (multiinsertLR&co new oldL oldR (cdr lat)
-		      (function
-		       (lambda (newlat L R)
-			 (funcall col
-				  (cons new
-					(cons oldL newlat))
-				  (1+ L) R)))))
+		      (lambda (newlat L R)
+			(funcall col
+				 (cons new
+				       (cons oldL newlat))
+				 (1+ L) R))))
    ((eq (car lat) oldR)
     (multiinsertLR&co new oldL oldR (cdr lat)
-		      (function
-		       (lambda (newlat L R)
-			 (funcall col
-				  (cons oldR
-					(cons new newlat))
-				  L (1+ R))))))
+		      (lambda (newlat L R)
+			(funcall col
+				 (cons oldR
+				       (cons new newlat))
+				 L (1+ R)))))
    (t (multiinsertLR&co new oldL oldR (cdr lat)
-			(function
-			 (lambda (newlat L R)
-			   (funcall col
-				    (cons (car lat)
-					  newlat)
-				    L R)))))))
+			(lambda (newlat L R)
+			  (funcall col
+				   (cons (car lat)
+					 newlat)
+				   L R))))))
 
 (multiinsertLR&co 'salty 'fish 'chips '(chips and fish or fish and chips)
-		  (function
-		   (lambda (newlat l r)
-		     (print newlat)
-		     (print l)
-		     (print r))))
-
+		  (lambda (newlat l r)
+		    (cons l (cons r newlat))))
 
 (defun even? (n)
   (= (* (/ n 2) 2) n))
@@ -387,7 +371,6 @@
 
 (evens-only* '((9 1 2 8) 3 10 ((9 9) 7 6) 2))
 
-
 (defun evens-only*&co (l col)
   (cond
    ((null l)
@@ -396,41 +379,26 @@
     (cond
      ((even? (car l))
       (evens-only*&co (cdr l)
-		      (function
-		       (lambda (newl p s)
-			 (funcall col
-				  (cons (car l) newl)
-				  (* (car l) p) s)))))
+		      (lambda (newl p s)
+			(funcall col
+				 (cons (car l) newl)
+				 (* (car l) p) s))))
      (t (evens-only*&co (cdr l)
-			(function
-			 (lambda (newl p s)
-			   (funcall col
-				    newl p
-				    (+ (car l) s))))))))
+			(lambda (newl p s)
+			  (funcall col
+				   newl p
+				   (+ (car l) s)))))))
    (t (evens-only*&co (car l)
-		      (function
-		       (lambda (al ap as)
-			 (evens-only*&co (cdr l)
-					 (function
-					  (lambda (dl dp ds)
-					    (funcall col
-						     (cons al dl)
-						     (* ap dp)
-						     (+ as ds)))))))))))
+		      (lambda (al ap as)
+			(evens-only*&co (cdr l)
+					(lambda (dl dp ds)
+					  (funcall col
+						   (cons al dl)
+						   (* ap dp)
+						   (+ as ds)))))))))
 
 (defun the-last-friend (newl product sum)
   (cons sum (cons product newl)))
 
-
 (evens-only*&co '((9 1 2 8) 3 10 ((9 9) 7 6) 2)
 		(function the-last-friend))
-
-
-
-
-
-
-
-
-
-

@@ -191,6 +191,7 @@
          (else *application)))
       (else *application))))
 
+
 (define expression-to-action
   (lambda (e)
     (cond
@@ -232,6 +233,10 @@
     (build (quote non-primitive)
            (cons table (cdr e)))))
 
+(meaning
+ '(lambda (x) (cons x y))
+ '(((y z) ((8) 9))))
+
 (define third
   (lambda (l)
     (car (cdr (cdr l)))))
@@ -268,6 +273,19 @@
   (lambda (e table)
     (evcon (cond-lines-of e) table)))
 
+(*cond
+ '(cond (coffee klatsch) (else party)) 
+ '(((coffee) (t))
+   ((klatsch party) (5 ((6))))))
+
+(lookup-in-table 'coffee '(((coffee) (t))
+                           ((klatsch party) (5 ((6)))))
+                 initial-table)
+
+(lookup-in-table 'klatsch '(((coffee) (t))
+                            ((klatsch party) (5 ((6)))))
+                 initial-table)
+
 (define evlis
   (lambda (args table)
     (cond
@@ -278,7 +296,7 @@
 
 (define *application
   (lambda (e table)
-    (aply
+    (applyz
      (meaning (function-of e) table)
      (evlis (arguments-of e) table))))
 
@@ -293,7 +311,8 @@
   (lambda (l)
     (eq? (first l) (quote non-primitive))))
 
-(define aply
+;;Can not use "apply". Already available.
+(define applyz
   (lambda (fun vals)
     (cond
       ((primitive? fun)
@@ -315,7 +334,7 @@
       ((eq? name (quote eq?))
        (eq? (first vals) (second vals)))
       ((eq? name (quote atom?))
-       (atom? (first vals)))
+       (:atom? (first vals)))
       ((eq? name (quote add1))
        (add1 (first vals)))
       ((eq? name (quote zero?))
@@ -325,21 +344,226 @@
       ((eq? name (quote number?))
        (number? (first vals))))))
 
-;(define atom?
-;  (lambda (x)
-;    (cond
-;      ((atom? x) #t)
-;      ((null? x) #f)
-;      ((eq? (car x) (quote primitive)) #t)
-;      ((eq? (car x) (quote non-primitive)) #t)
-;      (else #f))))
+(define :atom?
+  (lambda (x)
+    (cond
+      ((atom? x) #t)
+      ((null? x) #f)
+      ((eq? (car x) (quote primitive)) #t)
+      ((eq? (car x) (quote non-primitive)) #t)
+      (else #f))))
 
+(:atom? '(primitive car))
+
+(:atom? '(non-primitive
+	  ((((y z) ((8) 9))) (x) (cons x y))))
+
+
+;;**************(car '(a b c))
+(function-of '(car (quote (a b c))))
+;car
+
+(meaning 'car '())
+;(primitive car)
+
+(arguments-of '(car (quote (a b c))))
+;((quote (a b c)))
+
+(evlis '((quote (a b c))) '())
+;((a b c))
+
+(*application '(car (quote (a b c))) '())
+;a
+
+;;***********(cons 'a '(b))
+(cons 'a '(b))
+
+(function-of '(cons 'a '(b)))
+;'cons
+
+(meaning 'cons '())
+;'(primitive cons)
+
+(arguments-of '(cons 'a '(b)))
+;'('a '(b))
+
+(evlis '('a '(b)) '())
+;'(a (b))
+
+(*application '(cons 'a '(b)) '())
+;'(a b)
+
+;;******************(car (cdr (quote (a b c))))
+(function-of '(car (cdr (quote (a b c)))))
+
+(meaning 'car '())
+;(primitive car)
+
+(arguments-of '(car (cdr (quote (a b c)))))
+;((cdr (quote (a b c))))
+
+(evlis '((cdr (quote (a b c)))) '())
+;((b c))
+
+(*application '(car (cdr (quote (a b c)))) '())
+;b
+
+;;**********(atom? car)
+(atom? car)
+;#t
+(function-of '(atom? car))
+;atom?
+(meaning 'atom? '())
+;(primitive atom\?)
+
+(arguments-of '(atom? car))
+;(car)
+
+(evlis '(car) '())
+;((primitive car))
+
+(first '((primitive car)))
+;'(primitive car)
+
+(:atom? '(primitive car))
+;#t
+(apply-primitive 'atom?
+                 '((primitive car)))
+;#t`
+(applyz '(primitive atom?)
+        '((primitive car)))
+;#t
+
+(*application '(atom? car) '())
+
+;;**************(lambda (x y) (cons x y))
+(lambda (x y) (cons x y))
+
+(meaning '(lambda (x y) (cons x y)) '())
+;'(non-primitive (() (x y) (cons x y)))
+
+(atom? (lambda (x y) (cons x y)))
+;#t
+
+(function-of '(atom? (lambda (x y) (cons x y))))
+;atom?
+(meaning 'atom? '())
+;(primitive atom\?)
+
+(arguments-of '(atom? (lambda (x y) (cons x y))))
+;'((lambda (x y) (cons x y)))
+
+(evlis '((lambda (x y) (cons x y))) '())
+;'((non-primitive (() (x y) (cons x y))))
+
+(first '((non-primitive (() (x y) (cons x y)))))
+;'(non-primitive (() (x y) (cons x y)))
+
+(:atom? '(non-primitive (() (x y) (cons x y))))
+;#t
+(apply-primitive 'atom?
+                 '((non-primitive (() (x y) (cons x y)))))
+;#t
+(applyz '(primitive atom?)
+        '((non-primitive (() (x y) (cons x y)))))
+;#t
+
+(*application '(atom? (lambda (x y) (cons x y))) '())
+;#t
+
+;;************(first p)
+
+;;------------------------------------------
 (define apply-closure
   (lambda (closure vals)
     (meaning (body-of closure)
              (extend-table (new-entry (formals-of closure) vals)
                            (table-of closure)))))
-     
+
+;;(cons x y)
+;; table = (((x y) (1 (2))))
+(function-of '(cons x y))
+;cons
+
+(meaning 'cons '(((x y) (1 (2)))))
+;(primitive cons)
+
+(arguments-of '(cons x y))
+;(x y)
+
+(meaning 'x '(((x y) (1 (2)))))
+;1
+
+(meaning 'y '(((x y) (1 (2)))))
+;(2)
+
+(evlis '(x y) '(((x y) (1 (2)))))
+;(1 (2))
+
+(*application '(cons x y) '(((x y) (1 (2)))))
+;(1 2)
+
+(meaning '(cons x y) '(((x y) (1 (2)))))
+;(1 2)
+
+(cons 1 '(2))
+;(1 2)
+
+;;-------------
+;;---(cons z x) , z = 6, x = (a b c)
+(meaning '(cons z x) '(((x y)
+			((a b c) (d e f)))
+		       ((u v w)
+			(1 2 3))
+		       ((x y z)
+			(4 5 6))))
+;(6 a b c)
+
+(function-of '(cons z x))
+;cons
+
+(arguments-of '(cons z x))
+;(z x)
+
+(meaning 'z '(((x y)
+	       ((a b c) (d e f)))
+	      ((u v w)
+	       (1 2 3))
+	      ((x y z)
+	       (4 5 6))))
+;6
+
+(meaning 'x '(((x y)
+	       ((a b c) (d e f)))
+	      ((u v w)
+	       (1 2 3))
+	      ((x y z)
+	       (4 5 6))))
+;(a b c)
+
+(evlis '(z x) '(((x y)
+		 ((a b c) (d e f)))
+		((u v w)
+		 (1 2 3))
+		((x y z)
+		 (4 5 6))))
+;(6 (a b c))
+
+(meaning 'cons '(((x y)
+		  ((a b c) (d e f)))
+		 ((u v w)
+		  (1 2 3))
+		 ((x y z)
+		  (4 5 6))))
+;(primitive cons)
+
+(apply-primitive 'cons '(6 (a b c)))
+;(6 a b c)
+
+(applyz '(primitive cons) '(6 (a b c)))
+;(6 a b c)
+
+;;-----------------
 
 (value '((lambda (x y)(cons x y)) 1 '(2)))
 

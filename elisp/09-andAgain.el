@@ -155,13 +155,13 @@
    (t (1+ (length (cdr l))))))
 
 
-					;length0
+;;length0
 (lambda (l)
   (cond
    ((null l) 0)
    (t (1+ (eternity (cdr l))))))
 
-					;(length0 (quote()))
+;;(length0 (quote()))
 ((lambda (l)
    (cond
     ((null l) 0)

@@ -1,4 +1,4 @@
-# the-little-schemer
+# The Little Schemer
 Scheme and Emacs-Lisp code for book "The Little Schemer"
 
 ## Acknowledgment
@@ -10,5 +10,5 @@ Scheme and Emacs-Lisp code for book "The Little Schemer"
 
 ## Notes
 - Scheme code developed using DrRacket: https://racket-lang.org/
-- Emacs-Lisp code developed using emacs and run them in lisp-interaction-mode (M-x lisp-interaction-mode)
-- scheme/08-LambdaTheUltimate-multirember&co.docx is helpful to understand collector function in Chaper 8
+- Emacs-Lisp code developed using emacs and run in lisp-interaction-mode (M-x lisp-interaction-mode)
+- scheme/08-LambdaTheUltimate-multirember&co.docx is helpful to understand collector function in Chapter 8

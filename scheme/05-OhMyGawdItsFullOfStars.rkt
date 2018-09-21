@@ -108,7 +108,8 @@
       (else (leftmost (car l))))))
 
 ;;eqlist determines if two lists are equal
-(define eqlist1?
+;;my version
+(define eqlist-k?
   (lambda (l1 l2)
     (cond
       ((or (null? l1) (null? l2))
@@ -116,26 +117,67 @@
       ((or (atom? (car l1)) (atom? (car l2)))
        (and (and (atom? (car l1)) (atom? (car l2)))
             (and (eq? (car l1) (car l2))
-                 (eqlist1? (cdr l1) (cdr l2)))))
-      (else (and (eqlist1? (car l1) (car l2))
-                 (eqlist1? (cdr l1) (cdr l1)))))))
+                 (eqlist-k? (cdr l1) (cdr l2)))))
+      (else (and (eqlist-k? (car l1) (car l2))
+                 (eqlist-k? (cdr l1) (cdr l1)))))))
+
+;(eqlist-k? '(1) '())
+;(eqlist-k? '() '(1))
+;(eqlist-k? '(strawberry ice cream) '(strawberry ice cream))
+;(eqlist-k? '(strawberry ice cream) '(strawberry cream ice))
+;(eqlist-k? '(banana ((split))) '((banana) (split)))
+;(eqlist-k? '(beef ((sausage) (and (soda)))) '(beef ((salami) (and (soda)))))
+;(eqlist-k? '(beef ((sausage) (and (soda)))) '(beef ((sausage) (and (soda)))))
+
+(define eqlist1?
+  (lambda (l1 l2)
+    (cond
+      ((and (null? l1) (null? l2)) #t)
+      ((and (null? l1) (atom? (car l2))) #f)
+      ((null? l1) #f)
+      ((and (atom? (car l1)) (null? l2)) #f)
+      ((and (atom? (car l1)) (atom? (car l2)))
+       (and (eqan? (car l1) (car l2))
+            (eqlist1? (cdr l1) (cdr l2))))
+      ((atom? (car l1)) #f)
+      ((null? l2) #f)
+      ((atom? (car l2)) #f)
+      (else
+       (and (eqlist1? (car l1) (car l2))
+            (eqlist1? (cdr l1) (cdr l2)))))))
+
+;(eqlist1? '(1) '())
+;(eqlist1? '() '(1))
+;(eqlist1? '(strawberry ice cream) '(strawberry ice cream))
+;(eqlist1? '(strawberry ice cream) '(strawberry cream ice))
+;(eqlist1? '(banana ((split))) '((banana) (split)))
+;(eqlist1? '(beef ((sausage) (and (soda)))) '(beef ((salami) (and (soda)))))
+;(eqlist1? '(beef ((sausage) (and (soda)))) '(beef ((sausage) (and (soda)))))
+
 
 (define eqlist2?
   (lambda (l1 l2)
     (cond
       ((and (null? l1) (null? l2)) #t)
       ((or (null? l1) (null? l2)) #f)
-      ((and (atom? (car l1)) (null? l2)) #f)
       ((and (atom? (car l1)) (atom? (car l2)))
        (and (eqan? (car l1) (car l2))
             (eqlist2? (cdr l1) (cdr l2))))
-      ((atom? (car l1)) #f)
-      ((null? l2) #f)
+      ((or (atom? (car l1)) (atom? (car l2))) #f)
       (else
        (and (eqlist2? (car l1) (car l2))
             (eqlist2? (cdr l1) (cdr l2)))))))
 
-(provide equal?)
+
+;(eqlist2? '(1) '())
+;(eqlist2? '() '(1))
+;(eqlist2? '(strawberry ice cream) '(strawberry ice cream))
+;(eqlist2? '(strawberry ice cream) '(strawberry cream ice))
+;(eqlist2? '(banana ((split))) '((banana) (split)))
+;(eqlist2? '(beef ((sausage) (and (soda)))) '(beef ((salami) (and (soda)))))
+;(eqlist2? '(beef ((sausage) (and (soda)))) '(beef ((sausage) (and (soda)))))
+
+;(provide equal?)
 (define equal?
   (lambda (s1 s2)
     (cond
@@ -152,6 +194,15 @@
       (else
        (and (equal? (car l1) (car l2))
             (eqlist? (cdr l1) (cdr l2)))))))
+
+(eqlist? '(1) '())
+(eqlist? '() '(1))
+(eqlist? '(strawberry ice cream) '(strawberry ice cream))
+(eqlist? '(strawberry ice cream) '(strawberry cream ice))
+(eqlist? '(banana ((split))) '((banana) (split)))
+(eqlist? '(beef ((sausage) (and (soda)))) '(beef ((salami) (and (soda)))))
+(eqlist? '(beef ((sausage) (and (soda)))) '(beef ((sausage) (and (soda)))))
+
 
 ;; remove the first matching S-expression s in l
 (define rember
